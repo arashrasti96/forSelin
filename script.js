@@ -26,7 +26,7 @@ const PAGE_PADDING = 16;
 const MAGNET_RADIUS = 130;
 const MAX_SPEED = 32;
 const RETURN_DELAY = 2000;
-const noResponses = ["نه صبر کن!", "یادم رفت از اون گیفی که خوشت میاد فقط بذار جابجاشون کنم :))"];
+const noResponses = ["نه صبر کن!", "یادم رفت از اون یکی گیف خوشت میاد. بذار جابجاشون کنم"];
 const storyResponses = [
   "ببین من دوباره میام سراغت اگه بگی نه",
   "من تو چیزهایی که می‌خوام کوتاه نمیام و من تو رو می‌خوام!",
