@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#e95420" />
+    <title>A Tiny Question</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="question-card" aria-labelledby="question">
+        <p class="eyebrow">A tiny question</p>
+        <h1 id="question">Would you say yes to a little adventure?</h1>
+        <p class="subtext">There is only one very good answer.</p>
+
+        <div class="choice-area" id="choice-area">
+          <button class="answer-button yes-button" id="yes-button" type="button">Yes</button>
+        </div>
+
+        <p class="answer-message" id="answer-message" aria-live="polite"></p>
+      </section>
+    </main>
+    <button
+      class="answer-button no-button"
+      id="no-button"
+      type="button"
+      disabled
+      aria-disabled="true"
+      tabindex="-1"
+    >
+      No
+    </button>
+
+    <script src="script.js"></script>
+  </body>
+</html>
