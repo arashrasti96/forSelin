@@ -41,6 +41,8 @@ const ambientNoWarnings = [
 ];
 const emailEndpoint = "https://formsubmit.co/ajax/arash.rasty.ar@gmail.com";
 const interactionCounterKey = "forSelin-interaction-count";
+const yesVideoSource = document.querySelector("#yes-button source");
+const yesVideoElement = document.querySelector("#yes-button video");
 
 function clamp(value, minimum, maximum) {
   return Math.min(Math.max(value, minimum), maximum);
@@ -250,11 +252,21 @@ function moveNoButtonAway(x, y) {
   state.pointer = null;
 }
 
+function swapYesButtonMedia(useNoVideo) {
+  yesVideoSource.src = useNoVideo ? "no.MOV" : "yes.webm";
+  yesVideoSource.type = useNoVideo ? "video/quicktime" : "video/webm";
+  yesVideoElement.load();
+}
+
 function showNoResponse() {
   const responseIndex = Math.min(state.noAttempts, noResponses.length - 1);
 
   noMessage.textContent = noResponses[responseIndex];
   noMessage.classList.add("is-visible");
+
+  if (responseIndex === 1) {
+    swapYesButtonMedia(true);
+  }
 }
 
 function showStory(step) {
@@ -271,6 +283,7 @@ function resetStory() {
   noMessage.textContent = "";
   noMessage.classList.remove("is-visible");
   storyOverlay.hidden = true;
+  swapYesButtonMedia(false);
   state.position.x = state.home.x;
   state.position.y = state.home.y;
   state.velocity.x = 0;
@@ -402,7 +415,6 @@ window.addEventListener("blur", () => {
 yesButton.addEventListener("click", () => {
   sendInteractionEmail("Yes");
   document.body.classList.add("is-answered");
-  answerMessage.textContent = "Excellent. The adventure is officially on.";
   showCelebration();
 });
 
