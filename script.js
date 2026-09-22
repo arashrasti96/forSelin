@@ -42,7 +42,7 @@ const ambientNoWarnings = [
   "اگه رو No کلیک کنی سیستمت هک میشه 😂",
   "شوخی، No PRESSURE!!",
 ];
-const emailEndpoint = "https://formsubmit.co/ajax/arash.rasty.ar@gmail.com";
+const emailEndpoint = "https://formsubmit.co/ajax/arash.rasti.96@gmail.com";
 const interactionCounterKey = "forSelin-interaction-count";
 const yesVideoSource = document.querySelector("#yes-button source");
 const yesVideoElement = document.querySelector("#yes-button video");
