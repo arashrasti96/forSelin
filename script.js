@@ -20,14 +20,17 @@ const state = {
   storyStep: 0,
   storyTimer: null,
   roamAngle: Math.random() * Math.PI * 2,
+  speedBoostUntil: 0,
   dimensions: { width: 0, height: 0, buttonWidth: 0, buttonHeight: 0 },
 };
 
 const PAGE_PADDING = 16;
 const MAGNET_RADIUS = 130;
-const MAX_SPEED = 42;
+const MAX_SPEED = 30;
+const BOOSTED_MAX_SPEED = 44;
 const RETURN_DELAY = 2000;
-const ROAM_SPEED = 2.1;
+const ROAM_SPEED = 1.35;
+const BOOSTED_ROAM_SPEED = 2.8;
 const isTouchDevice = window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0;
 const noResponses = ["نه صبر کن!", "یادم رفت از اون یکی گیف خوشت میاد. بذار جابجاشون کنم"];
 const storyResponses = [
@@ -201,10 +204,11 @@ function applyArenaEscape(closeness = 0) {
 
 function limitSpeed() {
   const speed = Math.hypot(state.velocity.x, state.velocity.y);
+  const maxSpeed = performance.now() < state.speedBoostUntil ? BOOSTED_MAX_SPEED : MAX_SPEED;
 
-  if (speed > MAX_SPEED) {
-    state.velocity.x = (state.velocity.x / speed) * MAX_SPEED;
-    state.velocity.y = (state.velocity.y / speed) * MAX_SPEED;
+  if (speed > maxSpeed) {
+    state.velocity.x = (state.velocity.x / speed) * maxSpeed;
+    state.velocity.y = (state.velocity.y / speed) * maxSpeed;
   }
 }
 
@@ -217,9 +221,12 @@ function maintainRoam() {
     return;
   }
 
-  state.roamAngle += (Math.random() - 0.5) * 0.15;
-  state.velocity.x += Math.cos(state.roamAngle) * ROAM_SPEED;
-  state.velocity.y += Math.sin(state.roamAngle) * ROAM_SPEED;
+  const isBoosted = performance.now() < state.speedBoostUntil;
+  const roamSpeed = isBoosted ? BOOSTED_ROAM_SPEED : ROAM_SPEED;
+
+  state.roamAngle += (Math.random() - 0.5) * (isBoosted ? 0.24 : 0.15);
+  state.velocity.x += Math.cos(state.roamAngle) * roamSpeed;
+  state.velocity.y += Math.sin(state.roamAngle) * roamSpeed;
 }
 
 function reflectOffBoundary(inwardDirection) {
@@ -245,6 +252,7 @@ function isNearNoButton(x, y) {
 }
 
 function moveNoButtonAway(x, y) {
+  state.speedBoostUntil = performance.now() + 5000;
   state.pointer = { x, y };
   const closeness = applyMagneticForce();
   applyArenaEscape(closeness);
@@ -283,7 +291,6 @@ function resetStory() {
   noMessage.textContent = "";
   noMessage.classList.remove("is-visible");
   storyOverlay.hidden = true;
-  swapYesButtonMedia(false);
   state.position.x = state.home.x;
   state.position.y = state.home.y;
   state.velocity.x = 0;
@@ -333,20 +340,36 @@ function handleNoAttempt(x, y) {
 }
 
 function sendInteractionEmail(button) {
-  const previousCount = Number(window.localStorage.getItem(interactionCounterKey) || 0);
-  const count = previousCount + 1;
+  let counts = {};
 
-  window.localStorage.setItem(interactionCounterKey, String(count));
+  try {
+    counts = JSON.parse(window.localStorage.getItem(interactionCounterKey) || "{}");
+  } catch {
+    counts = {};
+  }
+
+  counts[button] = Number(counts[button] || 0) + 1;
+  const count = counts[button];
+
+  try {
+    window.localStorage.setItem(interactionCounterKey, JSON.stringify(counts));
+  } catch {
+    // Continue sending the notification when browser storage is unavailable.
+  }
+  const formData = new URLSearchParams({
+    _subject: `For Selin: ${button} clicked ${count} time${count === 1 ? "" : "s"}`,
+    _template: "table",
+    button,
+    times: String(count),
+  });
+
   window.fetch(emailEndpoint, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": "application/x-www-form-urlencoded",
       Accept: "application/json",
     },
-    body: JSON.stringify({
-      _subject: `${button} button pressed ${count} time${count === 1 ? "" : "s"}`,
-      message: `${button} button pressed ${count} time${count === 1 ? "" : "s"}`,
-    }),
+    body: formData.toString(),
   }).catch(() => {});
 }
 
