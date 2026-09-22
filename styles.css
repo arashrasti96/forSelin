@@ -111,7 +111,7 @@ h1 {
 }
 
 .choice-area {
-  height: 146px;
+  height: 166px;
   margin-top: 32px;
   border-top: 1px solid var(--line);
 }
@@ -120,13 +120,14 @@ h1 {
   position: absolute;
   display: inline-grid;
   width: 108px;
-  height: 108px;
+  height: 136px;
   place-items: center;
-  overflow: hidden;
+  overflow: visible;
   padding: 0;
-  border: 3px solid var(--ink);
-  border-radius: 50%;
-  background: var(--paper);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
   font: inherit;
   font-size: 0.95rem;
   font-weight: 500;
@@ -138,19 +139,16 @@ h1 {
   bottom: 22px;
   left: 0;
   color: var(--paper);
-  box-shadow: 5px 5px 0 var(--ink);
   cursor: pointer;
 }
 
 .yes-button:hover,
 .yes-button:focus-visible {
-  box-shadow: 7px 7px 0 var(--ink);
   outline: none;
   transform: translate(-2px, -2px);
 }
 
 .yes-button:active {
-  box-shadow: 1px 1px 0 var(--ink);
   transform: translate(4px, 4px);
 }
 
@@ -160,8 +158,6 @@ h1 {
   top: 0;
   left: 0;
   color: var(--ink);
-  background: var(--paper);
-  box-shadow: 5px 5px 0 var(--ink);
   cursor: not-allowed;
   pointer-events: none;
   transition: opacity 250ms ease;
@@ -170,30 +166,38 @@ h1 {
 }
 
 .choice-video {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 100%;
+  height: 108px;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper);
+  box-shadow: 5px 5px 0 var(--ink);
   object-fit: cover;
   pointer-events: none;
 }
 
 .choice-label {
   position: absolute;
-  right: 10px;
-  bottom: 9px;
-  left: 10px;
-  padding: 4px 5px;
+  top: 118px;
+  left: 50%;
+  min-width: 66px;
+  padding: 4px 7px;
   border: 2px solid var(--ink);
   border-radius: 3px;
-  color: var(--paper);
-  background: var(--raspberry);
+  color: var(--ink);
+  background: var(--gold);
   font-size: 0.7rem;
   line-height: 1;
   text-align: center;
+  transform: translateX(-50%);
 }
 
 .no-button .choice-label {
-  color: var(--ink);
-  background: var(--gold);
+  color: var(--paper);
+  background: var(--raspberry);
 }
 
 .answer-message {
@@ -249,12 +253,20 @@ body.is-answered .no-button {
   }
 
   .choice-area {
-    height: 136px;
+    height: 152px;
   }
 
   .answer-button {
     width: 96px;
+    height: 122px;
+  }
+
+  .choice-video {
     height: 96px;
+  }
+
+  .choice-label {
+    top: 104px;
   }
 }
 
