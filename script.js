@@ -14,9 +14,10 @@ const state = {
 };
 
 const PAGE_PADDING = 16;
-const MAGNET_RADIUS = 220;
-const MAX_SPEED = 52;
+const MAGNET_RADIUS = 130;
+const MAX_SPEED = 32;
 const RETURN_DELAY = 2000;
+const isTouchDevice = window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0;
 
 function clamp(value, minimum, maximum) {
   return Math.min(Math.max(value, minimum), maximum);
@@ -119,8 +120,9 @@ function applyMagneticForce() {
     return;
   }
 
-  const buttonCenterX = state.position.x + state.dimensions.buttonWidth / 2;
-  const buttonCenterY = state.position.y + state.dimensions.buttonHeight / 2;
+  const buttonRect = noButton.getBoundingClientRect();
+  const buttonCenterX = buttonRect.left + buttonRect.width / 2;
+  const buttonCenterY = buttonRect.top + buttonRect.height / 2;
   let differenceX = buttonCenterX - state.pointer.x;
   let differenceY = buttonCenterY - state.pointer.y;
   let distance = Math.hypot(differenceX, differenceY);
@@ -137,7 +139,7 @@ function applyMagneticForce() {
   }
 
   const closeness = 1 - distance / MAGNET_RADIUS;
-  const force = 2 + closeness ** 1.8 * 24 + (distance < 52 ? 14 : 0);
+  const force = 1 + closeness ** 2 * 15 + (distance < 36 ? 8 : 0);
 
   state.velocity.x += (differenceX / distance) * force;
   state.velocity.y += (differenceY / distance) * force;
@@ -157,7 +159,7 @@ function applyArenaEscape(closeness = 0) {
   const normalizedX = (buttonCenterX - arena.centerX) / arena.radiusX;
   const normalizedY = (buttonCenterY - arena.centerY) / arena.radiusY;
   const boundaryDistance = Math.hypot(normalizedX, normalizedY);
-  const edgeProximity = clamp((boundaryDistance - 0.64) / 0.36, 0, 1);
+  const edgeProximity = clamp((boundaryDistance - 0.78) / 0.22, 0, 1);
 
   if (!edgeProximity) {
     return;
@@ -166,7 +168,7 @@ function applyArenaEscape(closeness = 0) {
   const inwardX = arena.centerX - buttonCenterX;
   const inwardY = arena.centerY - buttonCenterY;
   const inwardLength = Math.hypot(inwardX, inwardY) || 1;
-  const edgeBoost = (18 + closeness * 36) * edgeProximity ** 2;
+  const edgeBoost = (8 + closeness * 16) * edgeProximity ** 2;
 
   state.velocity.x += (inwardX / inwardLength) * edgeBoost;
   state.velocity.y += (inwardY / inwardLength) * edgeBoost;
@@ -179,6 +181,42 @@ function limitSpeed() {
     state.velocity.x = (state.velocity.x / speed) * MAX_SPEED;
     state.velocity.y = (state.velocity.y / speed) * MAX_SPEED;
   }
+}
+
+function nudgeNoButton(speed) {
+  const angle = Math.random() * Math.PI * 2;
+
+  state.velocity.x = Math.cos(angle) * speed;
+  state.velocity.y = Math.sin(angle) * speed;
+  state.lastEvadedAt = performance.now();
+}
+
+function isNearNoButton(x, y) {
+  const buttonRect = noButton.getBoundingClientRect();
+  const padding = 44;
+
+  return (
+    x >= buttonRect.left - padding &&
+    x <= buttonRect.right + padding &&
+    y >= buttonRect.top - padding &&
+    y <= buttonRect.bottom + padding
+  );
+}
+
+function startTouchEvasion() {
+  if (!isTouchDevice) {
+    return;
+  }
+
+  const hop = () => {
+    if (!document.body.classList.contains("is-answered")) {
+      nudgeNoButton(7 + Math.random() * 7);
+    }
+
+    window.setTimeout(hop, 850 + Math.random() * 950);
+  };
+
+  window.setTimeout(hop, 700);
 }
 
 function returnHomeWhenSafe() {
@@ -208,16 +246,16 @@ function moveNoButton() {
   returnHomeWhenSafe();
   limitSpeed();
 
-  state.velocity.x *= 0.9;
-  state.velocity.y *= 0.9;
+  state.velocity.x *= 0.82;
+  state.velocity.y *= 0.82;
   state.position.x += state.velocity.x;
   state.position.y += state.velocity.y;
 
   const inwardDirection = keepButtonInsideArena();
 
   if (inwardDirection) {
-    state.velocity.x = inwardDirection.x * 40;
-    state.velocity.y = inwardDirection.y * 40;
+    state.velocity.x = inwardDirection.x * 10;
+    state.velocity.y = inwardDirection.y * 10;
   }
 
   placeNoButton();
@@ -232,19 +270,13 @@ window.addEventListener("pointermove", (event) => {
 });
 
 window.addEventListener("pointerdown", (event) => {
-  if (event.pointerType !== "touch") {
+  if (event.pointerType !== "touch" && !isTouchDevice) {
     return;
   }
 
-  state.pointer = {
-    x: event.clientX,
-    y: event.clientY,
-  };
-
-  const closeness = applyMagneticForce();
-  applyArenaEscape(closeness);
-  limitSpeed();
-  state.pointer = null;
+  if (isNearNoButton(event.clientX, event.clientY)) {
+    nudgeNoButton(44 + Math.random() * 12);
+  }
 });
 
 window.addEventListener("blur", () => {
@@ -262,3 +294,4 @@ questionCard.addEventListener("animationend", updateHomePosition, { once: true }
 
 initializeButtonPosition();
 requestAnimationFrame(moveNoButton);
+startTouchEvasion();
