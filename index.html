@@ -16,12 +16,15 @@
   <body>
     <main class="page-shell">
       <section class="question-card" aria-labelledby="question">
-        <p class="eyebrow">A question for Selin</p>
         <h1 id="question">Selin, will you date me?</h1>
-        <p class="subtext">I would really like that.</p>
 
         <div class="choice-area" id="choice-area">
-          <button class="answer-button yes-button" id="yes-button" type="button">Yes</button>
+          <button class="answer-button yes-button" id="yes-button" type="button" aria-label="Yes">
+            <video class="choice-video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+              <source src="yes.webm" type="video/webm" />
+            </video>
+            <span class="choice-label">Yes</span>
+          </button>
         </div>
 
         <p class="answer-message" id="answer-message" aria-live="polite"></p>
@@ -34,8 +37,12 @@
       disabled
       aria-disabled="true"
       tabindex="-1"
+      aria-label="No"
     >
-      No
+      <video class="choice-video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+        <source src="no.MOV" type="video/quicktime" />
+      </video>
+      <span class="choice-label">No</span>
     </button>
 
     <script src="script.js"></script>
