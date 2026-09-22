@@ -91,7 +91,7 @@ function updateHomePosition() {
     state.dimensions.width - state.dimensions.buttonWidth - PAGE_PADDING,
   );
   state.home.y = clamp(
-    choiceAreaRect.top + 18,
+    choiceAreaRect.bottom - state.dimensions.buttonHeight - 22,
     PAGE_PADDING,
     state.dimensions.height - state.dimensions.buttonHeight - PAGE_PADDING,
   );
