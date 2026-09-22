@@ -26,7 +26,7 @@ const PAGE_PADDING = 16;
 const MAGNET_RADIUS = 130;
 const MAX_SPEED = 32;
 const RETURN_DELAY = 2000;
-const noResponses = ["نه صبر کن!", "بابا یک دقیقه صبر کن!!!"];
+const noResponses = ["نه صبر کن!", "یادم رفت از اون گیفی که خوشت میاد فقط بذار جابجاشون کنم :))"];
 const storyResponses = [
   "ببین من دوباره میام سراغت اگه بگی نه",
   "من تو چیزهایی که می‌خوام کوتاه نمیام و من تو رو می‌خوام!",
@@ -274,10 +274,8 @@ function sendInteractionEmail(button) {
       Accept: "application/json",
     },
     body: JSON.stringify({
-      _subject: `For Selin: ${button} interaction #${count}`,
-      button,
-      interactionCount: count,
-      page: window.location.href,
+      _subject: `${button} button pressed ${count} time${count === 1 ? "" : "s"}`,
+      message: `${button} button pressed ${count} time${count === 1 ? "" : "s"}`,
     }),
   }).catch(() => {});
 }
