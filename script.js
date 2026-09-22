@@ -19,17 +19,25 @@ const state = {
   noAttempts: 0,
   storyStep: 0,
   storyTimer: null,
+  roamAngle: Math.random() * Math.PI * 2,
   dimensions: { width: 0, height: 0, buttonWidth: 0, buttonHeight: 0 },
 };
 
 const PAGE_PADDING = 16;
 const MAGNET_RADIUS = 130;
-const MAX_SPEED = 32;
+const MAX_SPEED = 42;
 const RETURN_DELAY = 2000;
+const ROAM_SPEED = 2.1;
+const isTouchDevice = window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0;
 const noResponses = ["نه صبر کن!", "یادم رفت از اون یکی گیف خوشت میاد. بذار جابجاشون کنم"];
 const storyResponses = [
   "ببین من دوباره میام سراغت اگه بگی نه",
   "من تو چیزهایی که می‌خوام کوتاه نمیام و من تو رو می‌خوام!",
+];
+const ambientNoWarnings = [
+  "روی اون No کلیک نکنیا!",
+  "اگه رو No کلیک کنی سیستمت هک میشه 😂",
+  "شوخی، No PRESSURE!!",
 ];
 const emailEndpoint = "https://formsubmit.co/ajax/arash.rasty.ar@gmail.com";
 const interactionCounterKey = "forSelin-interaction-count";
@@ -154,7 +162,7 @@ function applyMagneticForce() {
   }
 
   const closeness = 1 - distance / MAGNET_RADIUS;
-  const force = 1 + closeness ** 2 * 15 + (distance < 36 ? 8 : 0);
+  const force = 1 + closeness ** 2 * 20 + (distance < 36 ? 11 : 0);
 
   state.velocity.x += (differenceX / distance) * force;
   state.velocity.y += (differenceY / distance) * force;
@@ -196,6 +204,30 @@ function limitSpeed() {
     state.velocity.x = (state.velocity.x / speed) * MAX_SPEED;
     state.velocity.y = (state.velocity.y / speed) * MAX_SPEED;
   }
+}
+
+function isNoButtonIdle() {
+  return storyOverlay.hidden && !document.body.classList.contains("is-answered");
+}
+
+function maintainRoam() {
+  if (!isTouchDevice || !isNoButtonIdle()) {
+    return;
+  }
+
+  state.roamAngle += (Math.random() - 0.5) * 0.15;
+  state.velocity.x += Math.cos(state.roamAngle) * ROAM_SPEED;
+  state.velocity.y += Math.sin(state.roamAngle) * ROAM_SPEED;
+}
+
+function reflectOffBoundary(inwardDirection) {
+  const normalX = -inwardDirection.x;
+  const normalY = -inwardDirection.y;
+  const dot = state.velocity.x * normalX + state.velocity.y * normalY;
+
+  state.velocity.x = (state.velocity.x - 2 * dot * normalX) * 0.85;
+  state.velocity.y = (state.velocity.y - 2 * dot * normalY) * 0.85;
+  state.roamAngle = Math.atan2(state.velocity.y, state.velocity.x);
 }
 
 function isNearNoButton(x, y) {
@@ -246,6 +278,31 @@ function resetStory() {
   placeNoButton();
 }
 
+function showAmbientWarning(text) {
+  if (state.noAttempts > 0 || !isNoButtonIdle()) {
+    return;
+  }
+
+  noMessage.textContent = text;
+  noMessage.classList.add("is-visible");
+}
+
+function hideAmbientWarning() {
+  if (state.noAttempts > 0 || !isNoButtonIdle()) {
+    return;
+  }
+
+  noMessage.textContent = "";
+  noMessage.classList.remove("is-visible");
+}
+
+function scheduleAmbientWarnings() {
+  window.setTimeout(() => showAmbientWarning(ambientNoWarnings[0]), 4000);
+  window.setTimeout(() => showAmbientWarning(ambientNoWarnings[1]), 9000);
+  window.setTimeout(() => showAmbientWarning(ambientNoWarnings[2]), 14000);
+  window.setTimeout(hideAmbientWarning, 19000);
+}
+
 function handleNoAttempt(x, y) {
   if (!isNearNoButton(x, y) || !storyOverlay.hidden) {
     return;
@@ -285,7 +342,7 @@ function showCelebration() {
 }
 
 function returnHomeWhenSafe() {
-  if (performance.now() - state.lastEvadedAt < RETURN_DELAY) {
+  if (isTouchDevice || performance.now() - state.lastEvadedAt < RETURN_DELAY) {
     return;
   }
 
@@ -309,18 +366,18 @@ function moveNoButton() {
   const closeness = applyMagneticForce();
   applyArenaEscape(closeness);
   returnHomeWhenSafe();
+  maintainRoam();
   limitSpeed();
 
-  state.velocity.x *= 0.82;
-  state.velocity.y *= 0.82;
+  state.velocity.x *= 0.86;
+  state.velocity.y *= 0.86;
   state.position.x += state.velocity.x;
   state.position.y += state.velocity.y;
 
   const inwardDirection = keepButtonInsideArena();
 
   if (inwardDirection) {
-    state.velocity.x = inwardDirection.x * 10;
-    state.velocity.y = inwardDirection.y * 10;
+    reflectOffBoundary(inwardDirection);
   }
 
   placeNoButton();
@@ -367,3 +424,4 @@ questionCard.addEventListener("animationend", updateHomePosition, { once: true }
 
 initializeButtonPosition();
 requestAnimationFrame(moveNoButton);
+scheduleAmbientWarnings();
