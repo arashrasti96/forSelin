@@ -7,6 +7,8 @@ const noMessage = document.querySelector("#no-message");
 const storyOverlay = document.querySelector("#story-overlay");
 const storyText = document.querySelector("#story-text");
 const storyNext = document.querySelector("#story-next");
+const celebrationOverlay = document.querySelector("#celebration-overlay");
+const celebrationClose = document.querySelector("#celebration-close");
 
 const state = {
   position: { x: 0, y: 0 },
@@ -29,6 +31,8 @@ const storyResponses = [
   "ببین من دوباره میام سراغت اگه بگی نه",
   "من تو چیزهایی که می‌خوام کوتاه نمیام و من تو رو می‌خوام!",
 ];
+const emailEndpoint = "https://formsubmit.co/ajax/arash.rasty.ar@gmail.com";
+const interactionCounterKey = "forSelin-interaction-count";
 
 function clamp(value, minimum, maximum) {
   return Math.min(Math.max(value, minimum), maximum);
@@ -247,6 +251,7 @@ function handleNoAttempt(x, y) {
     return;
   }
 
+  sendInteractionEmail("No");
   moveNoButtonAway(x, y);
   showNoResponse();
   state.noAttempts += 1;
@@ -255,6 +260,30 @@ function handleNoAttempt(x, y) {
     window.clearTimeout(state.storyTimer);
     state.storyTimer = window.setTimeout(() => showStory(0), 2000);
   }
+}
+
+function sendInteractionEmail(button) {
+  const previousCount = Number(window.localStorage.getItem(interactionCounterKey) || 0);
+  const count = previousCount + 1;
+
+  window.localStorage.setItem(interactionCounterKey, String(count));
+  window.fetch(emailEndpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      _subject: `For Selin: ${button} interaction #${count}`,
+      button,
+      interactionCount: count,
+      page: window.location.href,
+    }),
+  }).catch(() => {});
+}
+
+function showCelebration() {
+  celebrationOverlay.hidden = false;
 }
 
 function returnHomeWhenSafe() {
@@ -316,9 +345,10 @@ window.addEventListener("blur", () => {
 });
 
 yesButton.addEventListener("click", () => {
+  sendInteractionEmail("Yes");
   document.body.classList.add("is-answered");
   answerMessage.textContent = "Excellent. The adventure is officially on.";
-  yesButton.textContent = "Yay!";
+  showCelebration();
 });
 
 storyNext.addEventListener("click", () => {
@@ -328,6 +358,10 @@ storyNext.addEventListener("click", () => {
   }
 
   resetStory();
+});
+
+celebrationClose.addEventListener("click", () => {
+  celebrationOverlay.hidden = true;
 });
 
 window.addEventListener("resize", updateDimensions);
