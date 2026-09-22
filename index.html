@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Vazirmatn:wght@500;600&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
@@ -28,6 +28,7 @@
         </div>
 
         <p class="answer-message" id="answer-message" aria-live="polite"></p>
+        <p class="no-message" id="no-message" aria-live="assertive"></p>
       </section>
     </main>
     <button
@@ -42,6 +43,13 @@
       <video class="choice-video" autoplay muted loop playsinline preload="auto" aria-hidden="true" src="no.MOV"></video>
       <span class="choice-label">No</span>
     </button>
+
+    <div class="story-overlay" id="story-overlay" hidden>
+      <section class="story-card" role="dialog" aria-modal="true" aria-labelledby="story-text" dir="rtl">
+        <p class="story-text" id="story-text"></p>
+        <button class="story-next" id="story-next" type="button">بعدی</button>
+      </section>
+    </div>
 
     <script src="script.js"></script>
   </body>

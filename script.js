@@ -3,6 +3,10 @@ const noButton = document.querySelector("#no-button");
 const yesButton = document.querySelector("#yes-button");
 const questionCard = document.querySelector(".question-card");
 const answerMessage = document.querySelector("#answer-message");
+const noMessage = document.querySelector("#no-message");
+const storyOverlay = document.querySelector("#story-overlay");
+const storyText = document.querySelector("#story-text");
+const storyNext = document.querySelector("#story-next");
 
 const state = {
   position: { x: 0, y: 0 },
@@ -10,6 +14,9 @@ const state = {
   velocity: { x: 0, y: 0 },
   pointer: null,
   lastEvadedAt: performance.now(),
+  noAttempts: 0,
+  storyStep: 0,
+  storyTimer: null,
   dimensions: { width: 0, height: 0, buttonWidth: 0, buttonHeight: 0 },
 };
 
@@ -17,7 +24,11 @@ const PAGE_PADDING = 16;
 const MAGNET_RADIUS = 130;
 const MAX_SPEED = 32;
 const RETURN_DELAY = 2000;
-const isTouchDevice = window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0;
+const noResponses = ["نه صبر کن!", "بابا یک دقیقه صبر کن!!!"];
+const storyResponses = [
+  "ببین من دوباره میام سراغت اگه بگی نه",
+  "من تو چیزهایی که می‌خوام کوتاه نمیام و من تو رو می‌خوام!",
+];
 
 function clamp(value, minimum, maximum) {
   return Math.min(Math.max(value, minimum), maximum);
@@ -183,14 +194,6 @@ function limitSpeed() {
   }
 }
 
-function nudgeNoButton(speed) {
-  const angle = Math.random() * Math.PI * 2;
-
-  state.velocity.x = Math.cos(angle) * speed;
-  state.velocity.y = Math.sin(angle) * speed;
-  state.lastEvadedAt = performance.now();
-}
-
 function isNearNoButton(x, y) {
   const buttonRect = noButton.getBoundingClientRect();
   const padding = 44;
@@ -203,20 +206,55 @@ function isNearNoButton(x, y) {
   );
 }
 
-function startTouchEvasion() {
-  if (!isTouchDevice) {
+function moveNoButtonAway(x, y) {
+  state.pointer = { x, y };
+  const closeness = applyMagneticForce();
+  applyArenaEscape(closeness);
+  limitSpeed();
+  state.pointer = null;
+}
+
+function showNoResponse() {
+  const responseIndex = Math.min(state.noAttempts, noResponses.length - 1);
+
+  noMessage.textContent = noResponses[responseIndex];
+  noMessage.classList.add("is-visible");
+}
+
+function showStory(step) {
+  state.storyStep = step;
+  storyText.textContent = storyResponses[step];
+  storyNext.textContent = step === 0 ? "بعدی" : "بازگشت";
+  storyOverlay.hidden = false;
+}
+
+function resetStory() {
+  window.clearTimeout(state.storyTimer);
+  state.storyTimer = null;
+  state.noAttempts = 0;
+  noMessage.textContent = "";
+  noMessage.classList.remove("is-visible");
+  storyOverlay.hidden = true;
+  state.position.x = state.home.x;
+  state.position.y = state.home.y;
+  state.velocity.x = 0;
+  state.velocity.y = 0;
+  placeNoButton();
+}
+
+function handleNoAttempt(x, y) {
+  if (!isNearNoButton(x, y) || !storyOverlay.hidden) {
     return;
   }
 
-  const hop = () => {
-    if (!document.body.classList.contains("is-answered")) {
-      nudgeNoButton(7 + Math.random() * 7);
-    }
+  moveNoButtonAway(x, y);
+  showNoResponse();
+  state.noAttempts += 1;
 
-    window.setTimeout(hop, 850 + Math.random() * 950);
-  };
-
-  window.setTimeout(hop, 700);
+  if (state.noAttempts === 2) {
+    window.clearTimeout(state.storyTimer);
+    state.storyTimer = window.setTimeout(() => showStory(0), 2000);
+  }
 }
 
 function returnHomeWhenSafe() {
@@ -270,13 +308,7 @@ window.addEventListener("pointermove", (event) => {
 });
 
 window.addEventListener("pointerdown", (event) => {
-  if (event.pointerType !== "touch" && !isTouchDevice) {
-    return;
-  }
-
-  if (isNearNoButton(event.clientX, event.clientY)) {
-    nudgeNoButton(44 + Math.random() * 12);
-  }
+  handleNoAttempt(event.clientX, event.clientY);
 });
 
 window.addEventListener("blur", () => {
@@ -289,9 +321,17 @@ yesButton.addEventListener("click", () => {
   yesButton.textContent = "Yay!";
 });
 
+storyNext.addEventListener("click", () => {
+  if (state.storyStep === 0) {
+    showStory(1);
+    return;
+  }
+
+  resetStory();
+});
+
 window.addEventListener("resize", updateDimensions);
 questionCard.addEventListener("animationend", updateHomePosition, { once: true });
 
 initializeButtonPosition();
 requestAnimationFrame(moveNoButton);
-startTouchEvasion();
