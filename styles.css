@@ -472,8 +472,8 @@ body.is-answered .no-button {
   }
 
   h1 {
-    font-size: clamp(1.5rem, 7vw, 2rem);
-    line-height: 1.05;
+    font-size: clamp(1.45rem, 6.8vw, 1.95rem);
+    line-height: 1;
   }
 
 .question-card::before {
