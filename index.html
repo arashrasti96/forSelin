@@ -72,9 +72,19 @@
 
     <div class="story-overlay" id="pressure-overlay" hidden>
       <section class="story-card" role="dialog" aria-modal="true" aria-labelledby="pressure-text">
-        <p class="story-text" id="pressure-text">no pressure</p>
-        <button class="story-next" id="pressure-close" type="button">Okay</button>
+        <p class="story-text" id="pressure-text"><span dir="ltr">Take your time</span>، هر وقت خواستی برگرد اینجا</p>
+        <button class="story-next" id="pressure-close" type="button">باشه</button>
       </section>
+    </div>
+
+    <div class="final-scene yes-scene" id="yes-scene" hidden>
+      <img class="yes-photo" src="me%20yes.jpg" alt="" />
+    </div>
+
+    <div class="final-scene wait-scene" id="wait-scene" hidden>
+      <video class="wait-video" autoplay muted loop playsinline>
+        <source src="wait.webm" type="video/webm" />
+      </video>
     </div>
 
     <script src="script.js"></script>

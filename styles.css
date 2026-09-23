@@ -277,6 +277,10 @@ body.is-answered .no-button {
   text-align: right;
 }
 
+.story-text [dir="ltr"] {
+  unicode-bidi: isolate;
+}
+
 .story-text {
   margin: 0;
   font-size: clamp(1.35rem, 4vw, 2rem);
@@ -318,6 +322,45 @@ body.is-answered .no-button {
 
 .celebration-overlay[hidden] {
   display: none;
+}
+
+.final-scene {
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+  display: grid;
+  overflow: hidden;
+  place-items: center;
+}
+
+.final-scene[hidden] {
+  display: none;
+}
+
+.yes-scene {
+  background: var(--raspberry);
+  animation: yes-flash 650ms steps(2, end) infinite;
+}
+
+.yes-photo {
+  width: min(58vmin, 420px);
+  height: min(58vmin, 420px);
+  border: 4px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper);
+  box-shadow: 10px 10px 0 var(--ink);
+  object-fit: cover;
+  animation: photo-roam 5s ease-in-out infinite alternate;
+}
+
+.wait-scene {
+  background: #17131a;
+}
+
+.wait-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .celebration-card {
@@ -488,4 +531,16 @@ body.is-answered .no-button {
   .question-card {
     animation: none;
   }
+}
+
+@keyframes yes-flash {
+  0%, 100% { background: var(--raspberry); }
+  50% { background: var(--gold); }
+}
+
+@keyframes photo-roam {
+  0% { transform: translate(-12vw, -8vh) rotate(-7deg); }
+  35% { transform: translate(14vw, -4vh) rotate(5deg); }
+  70% { transform: translate(-5vw, 12vh) rotate(-3deg); }
+  100% { transform: translate(10vw, 7vh) rotate(7deg); }
 }

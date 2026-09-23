@@ -12,6 +12,8 @@ const celebrationOverlay = document.querySelector("#celebration-overlay");
 const celebrationClose = document.querySelector("#celebration-close");
 const pressureOverlay = document.querySelector("#pressure-overlay");
 const pressureClose = document.querySelector("#pressure-close");
+const yesScene = document.querySelector("#yes-scene");
+const waitScene = document.querySelector("#wait-scene");
 
 const state = {
   position: { x: 0, y: 0 },
@@ -46,7 +48,7 @@ const ambientNoWarnings = [
   "شوخی، \u2066No PRESSURE!!\u2069",
 ];
 const emailEndpoint = "https://formsubmit.co/ajax/arash.rasty.ar@gmail.com";
-const interactionCounterKey = "forSelin-interaction-count";
+const interactionCounts = Object.create(null);
 const yesVideoSource = document.querySelector("#yes-button source");
 const yesVideoElement = document.querySelector("#yes-button video");
 
@@ -220,6 +222,8 @@ function isNoButtonIdle() {
     storyOverlay.hidden &&
     celebrationOverlay.hidden &&
     pressureOverlay.hidden &&
+    yesScene.hidden &&
+    waitScene.hidden &&
     !document.body.classList.contains("is-answered")
   );
 }
@@ -370,6 +374,18 @@ function resetTransientState() {
   placeNoButton();
 }
 
+function showYesPhotoScene() {
+  celebrationOverlay.hidden = true;
+  yesScene.hidden = false;
+}
+
+function showWaitVideoScene() {
+  resetTransientState();
+  waitScene.hidden = false;
+  document.querySelector(".page-shell").hidden = true;
+  noButton.hidden = true;
+}
+
 function showAmbientWarning(text) {
   if (state.noAttempts > 0 || !isNoButtonIdle()) {
     return;
@@ -411,22 +427,8 @@ function handleNoAttempt(x, y) {
 }
 
 function sendInteractionEmail(button) {
-  let counts = {};
-
-  try {
-    counts = JSON.parse(window.localStorage.getItem(interactionCounterKey) || "{}");
-  } catch {
-    counts = {};
-  }
-
-  counts[button] = Number(counts[button] || 0) + 1;
-  const count = counts[button];
-
-  try {
-    window.localStorage.setItem(interactionCounterKey, JSON.stringify(counts));
-  } catch {
-    // Continue sending the notification when browser storage is unavailable.
-  }
+  interactionCounts[button] = (interactionCounts[button] || 0) + 1;
+  const count = interactionCounts[button];
   const formData = new URLSearchParams({
     _subject: `For Selin: ${button} clicked ${count} time${count === 1 ? "" : "s"}`,
     _template: "table",
@@ -529,10 +531,17 @@ storyNext.addEventListener("click", () => {
 
 celebrationClose.addEventListener("click", () => {
   sendInteractionEmail("Yes");
-  celebrationOverlay.hidden = true;
+  showYesPhotoScene();
 });
 
-pressureClose.addEventListener("click", resetTransientState);
+pressureClose.addEventListener("click", showWaitVideoScene);
+
+window.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !yesScene.hidden) {
+    yesScene.hidden = true;
+    resetTransientState();
+  }
+});
 
 window.addEventListener("resize", updateDimensions);
 questionCard.addEventListener("animationend", updateHomePosition, { once: true });
