@@ -424,8 +424,13 @@ body.is-answered .no-button {
   }
 
   .question-card {
-    padding: 34px 26px 32px;
+    padding: 34px 18px 32px;
     box-shadow: 8px 8px 0 var(--ink);
+  }
+
+  h1 {
+    font-size: clamp(1.5rem, 7vw, 2rem);
+    line-height: 1.05;
   }
 
 .question-card::before {
