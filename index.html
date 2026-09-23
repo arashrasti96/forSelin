@@ -16,7 +16,7 @@
   <body>
     <main class="page-shell">
       <section class="question-card" aria-labelledby="question">
-        <h1 id="question">Selin, Will you date me or should I bother you more?</h1>
+        <h1 id="question">Selin, will you date me?</h1>
 
         <div class="choice-area" id="choice-area">
           <button class="answer-button yes-button" id="yes-button" type="button" aria-label="Yes">
@@ -24,6 +24,10 @@
               <source src="yes.webm" type="video/webm" />
             </video>
             <span class="choice-label">Yes</span>
+          </button>
+          <button class="answer-button more-time-button" id="more-time-button" type="button" aria-label="Need more time">
+            <video class="choice-video" autoplay muted loop playsinline preload="auto" aria-hidden="true" src="more_time.webm"></video>
+            <span class="choice-label">Need more<br class="mobile-label-break" /> time</span>
           </button>
         </div>
 
@@ -63,6 +67,13 @@
         </div>
         <p class="celebration-text" id="celebration-text">انتخابتو دوست داشتم<br />بهت زنگ می‌زنم</p>
         <button class="celebration-close" id="celebration-close" type="button">باشه</button>
+      </section>
+    </div>
+
+    <div class="story-overlay" id="pressure-overlay" hidden>
+      <section class="story-card" role="dialog" aria-modal="true" aria-labelledby="pressure-text">
+        <p class="story-text" id="pressure-text">no pressure</p>
+        <button class="story-next" id="pressure-close" type="button">Okay</button>
       </section>
     </div>
 

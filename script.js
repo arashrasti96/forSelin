@@ -1,6 +1,7 @@
 const choiceArea = document.querySelector("#choice-area");
 const noButton = document.querySelector("#no-button");
 const yesButton = document.querySelector("#yes-button");
+const moreTimeButton = document.querySelector("#more-time-button");
 const questionCard = document.querySelector(".question-card");
 const answerMessage = document.querySelector("#answer-message");
 const noMessage = document.querySelector("#no-message");
@@ -9,6 +10,8 @@ const storyText = document.querySelector("#story-text");
 const storyNext = document.querySelector("#story-next");
 const celebrationOverlay = document.querySelector("#celebration-overlay");
 const celebrationClose = document.querySelector("#celebration-close");
+const pressureOverlay = document.querySelector("#pressure-overlay");
+const pressureClose = document.querySelector("#pressure-close");
 
 const state = {
   position: { x: 0, y: 0 },
@@ -42,7 +45,7 @@ const ambientNoWarnings = [
   "اگه رو No کلیک کنی سیستمت هک میشه 😂",
   "شوخی، No PRESSURE!!",
 ];
-const emailEndpoint = "https://formsubmit.co/ajax/arash.rasti.96@gmail.com";
+const emailEndpoint = "https://formsubmit.co/ajax/arash.rasty.ar@gmail.com";
 const interactionCounterKey = "forSelin-interaction-count";
 const yesVideoSource = document.querySelector("#yes-button source");
 const yesVideoElement = document.querySelector("#yes-button video");
@@ -115,7 +118,7 @@ function updateHomePosition() {
   const currentPosition = { ...state.position };
 
   state.home.x = clamp(
-    choiceAreaRect.right - state.dimensions.buttonWidth - 14,
+    choiceAreaRect.right - state.dimensions.buttonWidth,
     PAGE_PADDING,
     state.dimensions.width - state.dimensions.buttonWidth - PAGE_PADDING,
   );
@@ -213,7 +216,12 @@ function limitSpeed() {
 }
 
 function isNoButtonIdle() {
-  return storyOverlay.hidden && !document.body.classList.contains("is-answered");
+  return (
+    storyOverlay.hidden &&
+    celebrationOverlay.hidden &&
+    pressureOverlay.hidden &&
+    !document.body.classList.contains("is-answered")
+  );
 }
 
 function maintainRoam() {
@@ -298,6 +306,24 @@ function resetStory() {
   placeNoButton();
 }
 
+function resetTransientState() {
+  resetStory();
+  celebrationOverlay.hidden = true;
+  pressureOverlay.hidden = true;
+  document.body.classList.remove("is-answered");
+  answerMessage.textContent = "";
+  noMessage.textContent = "";
+  noMessage.classList.remove("is-visible");
+  state.pointer = null;
+  state.lastEvadedAt = performance.now();
+  state.speedBoostUntil = 0;
+  state.position.x = state.home.x;
+  state.position.y = state.home.y;
+  state.velocity.x = 0;
+  state.velocity.y = 0;
+  placeNoButton();
+}
+
 function showAmbientWarning(text) {
   if (state.noAttempts > 0 || !isNoButtonIdle()) {
     return;
@@ -328,7 +354,6 @@ function handleNoAttempt(x, y) {
     return;
   }
 
-  sendInteractionEmail("No");
   moveNoButtonAway(x, y);
   showNoResponse();
   state.noAttempts += 1;
@@ -436,9 +461,13 @@ window.addEventListener("blur", () => {
 });
 
 yesButton.addEventListener("click", () => {
-  sendInteractionEmail("Yes");
   document.body.classList.add("is-answered");
   showCelebration();
+});
+
+moreTimeButton.addEventListener("click", () => {
+  sendInteractionEmail("Need more time");
+  pressureOverlay.hidden = false;
 });
 
 storyNext.addEventListener("click", () => {
@@ -447,12 +476,16 @@ storyNext.addEventListener("click", () => {
     return;
   }
 
+  sendInteractionEmail("No");
   resetStory();
 });
 
 celebrationClose.addEventListener("click", () => {
+  sendInteractionEmail("Yes");
   celebrationOverlay.hidden = true;
 });
+
+pressureClose.addEventListener("click", resetTransientState);
 
 window.addEventListener("resize", updateDimensions);
 questionCard.addEventListener("animationend", updateHomePosition, { once: true });

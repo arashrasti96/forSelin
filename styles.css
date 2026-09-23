@@ -152,6 +152,18 @@ h1 {
   transform: translate(4px, 4px);
 }
 
+.more-time-button {
+  bottom: 22px;
+  left: 50%;
+  color: var(--ink);
+  cursor: pointer;
+  transform: translateX(-50%);
+}
+
+.mobile-label-break {
+  display: none;
+}
+
 .no-button {
   position: fixed;
   z-index: 10;
@@ -431,16 +443,25 @@ body.is-answered .no-button {
   }
 
   .answer-button {
-    width: 112px;
+    width: clamp(72px, 22vw, 96px);
     height: 140px;
   }
 
   .choice-video {
-    height: 112px;
+    height: clamp(72px, 22vw, 96px);
   }
 
   .choice-label {
-    top: 120px;
+    top: clamp(80px, calc(22vw + 8px), 104px);
+  }
+
+  .more-time-button .choice-label {
+    width: 100px;
+    white-space: normal;
+  }
+
+  .mobile-label-break {
+    display: initial;
   }
 
   .story-card {
