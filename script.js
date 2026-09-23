@@ -374,7 +374,7 @@ function handleNoAttempt(x, y) {
   showNoResponse();
   state.noAttempts += 1;
 
-  if (state.noAttempts === 2) {
+  if (state.noAttempts === 3) {
     window.clearTimeout(state.storyTimer);
     state.storyTimer = window.setTimeout(() => showStory(0), 2000);
   }
