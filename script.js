@@ -251,52 +251,6 @@ function reflectOffBoundary(inwardDirection) {
   state.roamAngle = Math.atan2(state.velocity.y, state.velocity.x);
 }
 
-function keepNoAwayFromChoices() {
-  const choices = [yesButton, moreTimeButton];
-  const gap = 10;
-  const maximumX = state.dimensions.width - state.dimensions.buttonWidth - PAGE_PADDING;
-  const maximumY = state.dimensions.height - state.dimensions.buttonHeight - PAGE_PADDING;
-
-  for (const choice of choices) {
-    const choiceRect = choice.getBoundingClientRect();
-    const overlapsX =
-      state.position.x < choiceRect.right + gap &&
-      state.position.x + state.dimensions.buttonWidth > choiceRect.left - gap;
-    const overlapsY =
-      state.position.y < choiceRect.bottom + gap &&
-      state.position.y + state.dimensions.buttonHeight > choiceRect.top - gap;
-
-    if (!overlapsX || !overlapsY) {
-      continue;
-    }
-
-    const exits = [
-      { x: choiceRect.left - gap - state.dimensions.buttonWidth, y: state.position.y, axis: "x" },
-      { x: choiceRect.right + gap, y: state.position.y, axis: "x" },
-      { x: state.position.x, y: choiceRect.top - gap - state.dimensions.buttonHeight, axis: "y" },
-      { x: state.position.x, y: choiceRect.bottom + gap, axis: "y" },
-    ].filter((exit) => exit.x >= PAGE_PADDING && exit.x <= maximumX && exit.y >= PAGE_PADDING && exit.y <= maximumY);
-
-    if (exits.length === 0) {
-      continue;
-    }
-
-    exits.sort((first, second) =>
-      Math.hypot(first.x - state.position.x, first.y - state.position.y) -
-      Math.hypot(second.x - state.position.x, second.y - state.position.y),
-    );
-
-    const exit = exits[0];
-    state.position.x = exit.x;
-    state.position.y = exit.y;
-    if (exit.axis === "x") {
-      state.velocity.x *= -0.65;
-    } else {
-      state.velocity.y *= -0.65;
-    }
-  }
-}
-
 function isNearNoButton(x, y) {
   const buttonRect = noButton.getBoundingClientRect();
   const padding = 44;
@@ -488,7 +442,6 @@ function moveNoButton() {
   if (inwardDirection) {
     reflectOffBoundary(inwardDirection);
   }
-  keepNoAwayFromChoices();
 
   placeNoButton();
   requestAnimationFrame(moveNoButton);
